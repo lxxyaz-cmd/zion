@@ -1,0 +1,42 @@
+name: Feature Request
+description: Suggest a new component, API, or capability
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For large changes, consider opening a [Discussion](https://github.com/lxxyaz-cmd/zion/discussions) first to align on design.
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Industrial use case
+      description: Describe the real-world industrial scenario this feature addresses (equipment type, process, integration context).
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-api
+    attributes:
+      label: Proposed API
+      description: Sketch the method signatures, options, and return values you'd expect.
+      render: javascript
+    validations:
+      required: true
+
+  - type: dropdown
+    id: willing-to-implement
+    attributes:
+      label: Are you willing to implement this?
+      options:
+        - "Yes — I'll open a PR"
+        - "Maybe — I'd need guidance"
+        - "No — requesting for someone else to pick up"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workarounds have you tried? Why don't they fully solve the problem?
