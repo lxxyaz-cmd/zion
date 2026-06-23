@@ -1,0 +1,48 @@
+{
+  "name": "zion-digital-twin",
+  "version": "0.1.0",
+  "description": "A lightweight Three.js library for building industrial digital twin visualizations — pumps, cooling towers, tanks, pipes, and more.",
+  "type": "module",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./materials": "./src/materials/index.js",
+    "./components": "./src/components/index.js",
+    "./utils": "./src/utils/index.js"
+  },
+  "keywords": [
+    "three.js",
+    "digital-twin",
+    "3d-visualization",
+    "industrial",
+    "scada",
+    "iot",
+    "webgl",
+    "modbus",
+    "pump",
+    "cooling-tower"
+  ],
+  "author": "lxxyaz-cmd",
+  "license": "MIT",
+  "peerDependencies": {
+    "three": ">=0.150.0"
+  },
+  "devDependencies": {
+    "three": "^0.177.0",
+    "vite": "^6.3.5"
+  },
+  "scripts": {
+    "dev": "vite examples/cooling-system",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lxxyaz-cmd/zion.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lxxyaz-cmd/zion/issues"
+  },
+  "homepage": "https://github.com/lxxyaz-cmd/zion#readme"
+}

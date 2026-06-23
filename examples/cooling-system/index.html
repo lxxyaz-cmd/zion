@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Zion — Cooling System Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0d1117; color: #c9d1d9; font-family: "Segoe UI", monospace; }
+    #viewport { width: 100vw; height: 60vh; }
+    #controls { display: flex; gap: 12px; padding: 16px; flex-wrap: wrap; }
+    button {
+      background: #21262d; color: #58a6ff; border: 1px solid #30363d;
+      padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 13px;
+    }
+    button:hover { background: #30363d; }
+    button.on { background: #0d419d; color: #fff; }
+    #info { padding: 0 16px; font-size: 12px; color: #8b949e; }
+  </style>
+</head>
+<body>
+  <div id="viewport"></div>
+  <div id="controls">
+    <button id="btn-p1">Pump 1: OFF</button>
+    <button id="btn-p2">Pump 2: OFF</button>
+    <button id="btn-fan">Fan: OFF</button>
+  </div>
+  <div id="info">Tank level: <span id="lvl">80</span>% &nbsp;|&nbsp; Temp: <span id="tmp">32</span>°C</div>
+
+  <script type="module">
+    import { createIndustrialScene, CentrifugalPump, CoolingTower, StorageTank, addBox } from '../../src/index.js'
+    import * as THREE from 'three'
+
+    const container = document.getElementById('viewport')
+    const { scene, animate } = createIndustrialScene(container, {
+      cameraPos: [-1, 4.2, 11.5],
+      cameraTarget: [2.5, 1.8, -1.5],
+    })
+
+    // Floor
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x505860, roughness: 0.9 })
+    addBox(scene, 26, 0.12, 16, floorMat, 1.5, -0.06, -3)
+
+    // Equipment
+    const pump1 = new CentrifugalPump(scene, { position: [-2.5, 0, 0] })
+    const pump2 = new CentrifugalPump(scene, { position: [2.5,  0, 0] })
+    const tower = new CoolingTower(scene,    { position: [0, 3.6, -3.2] })
+    const tank  = new StorageTank(scene,     { position: [7.5, 0, 0] })
+
+    // State
+    const state = { p1: false, p2: false, fan: false, level: 80, temp: 32 }
+    const RAMP = 80, RATED = 1450
+    let speeds = { p1: 0, p2: 0, fan: 0 }
+
+    // Controls
+    document.getElementById('btn-p1').onclick = function() {
+      state.p1 = !state.p1; this.textContent = `Pump 1: ${state.p1 ? 'ON' : 'OFF'}`
+      this.classList.toggle('on', state.p1)
+    }
+    document.getElementById('btn-p2').onclick = function() {
+      state.p2 = !state.p2; this.textContent = `Pump 2: ${state.p2 ? 'ON' : 'OFF'}`
+      this.classList.toggle('on', state.p2)
+    }
+    document.getElementById('btn-fan').onclick = function() {
+      state.fan = !state.fan; this.textContent = `Fan: ${state.fan ? 'ON' : 'OFF'}`
+      this.classList.toggle('on', state.fan)
+    }
+
+    let lastPhys = 0
+    animate(() => {
+      const now = performance.now()
+      const dt = Math.min((now - lastPhys) / 1000, 0.1)
+      lastPhys = now
+
+      // Ramp speeds
+      const rampPer = RAMP * dt
+      speeds.p1 = state.p1 ? Math.min(speeds.p1 + rampPer, RATED) : Math.max(speeds.p1 - rampPer, 0)
+      speeds.p2 = state.p2 ? Math.min(speeds.p2 + rampPer, RATED) : Math.max(speeds.p2 - rampPer, 0)
+      speeds.fan = state.fan ? Math.min(speeds.fan + rampPer * 0.6, 960) : Math.max(speeds.fan - rampPer * 0.6, 0)
+
+      pump1.setSpeed(speeds.p1); pump1.update(dt)
+      pump2.setSpeed(speeds.p2); pump2.update(dt)
+      tower.setFanSpeed(speeds.fan); tower.update(dt)
+
+      // Simple physics
+      const flow = (speeds.p1 + speeds.p2) / RATED
+      state.temp = Math.max(18, Math.min(45, state.temp + flow * 0.02 - (speeds.fan / 960) * 0.05))
+      state.level = Math.max(5, Math.min(100, state.level - flow * 0.01 + (speeds.fan / 960) * 0.008))
+      tank.setLevel(state.level)
+
+      document.getElementById('lvl').textContent = state.level.toFixed(1)
+      document.getElementById('tmp').textContent = state.temp.toFixed(1)
+    })
+  </script>
+</body>
+</html>
